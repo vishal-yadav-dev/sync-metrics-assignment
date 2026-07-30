@@ -13,7 +13,7 @@ create table synced_records (
   source_updated_at timestamptz,             -- provider last-modified; ordering guard
   content_hash      text not null,           -- hash of normalized payload
   first_seen_at     timestamptz not null default now(),
-  last_seen_at      timestamptz not null default now()
+  last_seen_at      timestamptz not null default now()  -- last MODIFICATION, not last sighting
 );
 
 create unique index synced_records_natural_key

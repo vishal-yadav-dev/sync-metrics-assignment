@@ -52,3 +52,33 @@ export async function upsertRecord(
   // xmax is 0 only on a fresh insert; on an update it holds the locking transaction id.
   return row.inserted ? "inserted" : "updated";
 }
+
+export interface UpsertCounts {
+  inserted: number;
+  updated: number;
+  skipped: number;
+  errors: number; // not an upsert outcome: records that threw before producing one
+}
+
+// Record-level isolation for writes: one row that fails to persist must not abandon the
+// rest of the batch. Incremental and backfill both land here.
+export async function upsertMany(
+  records: NormalizedRecord[],
+  conn: Queryable = db,
+): Promise<UpsertCounts> {
+  const counts: UpsertCounts = { inserted: 0, updated: 0, skipped: 0, errors: 0 };
+
+  for (const record of records) {
+    try {
+      counts[await upsertRecord(record, conn)] += 1;
+    } catch (err) {
+      counts.errors += 1;
+      console.warn(
+        `[upsert] ${record.source}/${record.source_id} failed:`,
+        (err as Error).message,
+      );
+    }
+  }
+
+  return counts;
+}
