@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/http/server.ts",
+    "build": "tsc -p tsconfig.build.json && cp -R src/db/migrations dist/db/migrations",
+    "start": "node dist/http/server.js",
     "migrate": "tsx src/db/migrate.ts",
+    "migrate:prod": "node dist/db/migrate.js",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },

@@ -1,5 +1,8 @@
 import express from "express";
-import "../config/env";
+import { env } from "../config/env";
+import { runSyncJob } from "../jobs/sync-job";
+import { metricsRouter } from "../metrics/routes";
+import { jsonErrors, recordsRouter } from "./routes";
 
 const app = express();
 
@@ -7,8 +10,16 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-const PORT = 3000;
+app.post(
+  "/sync",
+  jsonErrors(async (_req, res) => {
+    res.json({ summaries: await runSyncJob() });
+  }, "sync job failed"),
+);
 
-app.listen(PORT, () => {
-  console.log(`[http] listening on http://localhost:${PORT}`);
+app.use("/records", recordsRouter);
+app.use("/metrics", metricsRouter);
+
+app.listen(env.PORT, () => {
+  console.log(`[http] listening on ${env.PORT}`);
 });

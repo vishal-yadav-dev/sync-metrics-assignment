@@ -5,11 +5,22 @@ const blankToUndefined = (v: unknown): unknown =>
   typeof v === "string" && v.trim() === "" ? undefined : v;
 
 const EnvSchema = z.object({
+  // Injected by the host (Render); 3000 locally. Validated here so a bad value fails at
+  // boot rather than silently binding port 0.
+  PORT: z.preprocess(
+    blankToUndefined,
+    z.coerce.number().int().positive().max(65535).default(3000),
+  ),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   STRIPE_SECRET_KEY: z.preprocess(blankToUndefined, z.string().min(1)),
 
   HUBSPOT_TOKEN: z.preprocess(blankToUndefined, z.string().min(1).optional()),
   GOOGLE_CLIENT_EMAIL: z.preprocess(blankToUndefined, z.email().optional()),
+  // Unset means the service account's own (empty) primary calendar.
+  GOOGLE_CALENDAR_ID: z.preprocess(
+    blankToUndefined,
+    z.string().min(1).optional(),
+  ),
   GOOGLE_PRIVATE_KEY: z
     .preprocess(blankToUndefined, z.string().min(1).optional())
     .transform((key) => key?.replace(/\\n/g, "\n")),
