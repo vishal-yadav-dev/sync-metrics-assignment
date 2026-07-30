@@ -60,13 +60,27 @@ export interface UpsertCounts {
   errors: number; // not an upsert outcome: records that threw before producing one
 }
 
+// knex prefixes err.message with the entire SQL statement; the driver's own text follows
+// the last " - ". Whitespace is collapsed so one bad row can never span multiple log lines.
+function driverDetail(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  const separator = message.lastIndexOf(" - ");
+  const detail = separator === -1 ? message : message.slice(separator + 3);
+  return detail.replace(/\s+/g, " ").trim();
+}
+
 // Record-level isolation for writes: one row that fails to persist must not abandon the
 // rest of the batch. Incremental and backfill both land here.
 export async function upsertMany(
   records: NormalizedRecord[],
   conn: Queryable = db,
 ): Promise<UpsertCounts> {
-  const counts: UpsertCounts = { inserted: 0, updated: 0, skipped: 0, errors: 0 };
+  const counts: UpsertCounts = {
+    inserted: 0,
+    updated: 0,
+    skipped: 0,
+    errors: 0,
+  };
 
   for (const record of records) {
     try {
@@ -74,8 +88,7 @@ export async function upsertMany(
     } catch (err) {
       counts.errors += 1;
       console.warn(
-        `[upsert] ${record.source}/${record.source_id} failed:`,
-        (err as Error).message,
+        `[upsert] ${record.source}/${record.source_id} failed: ${driverDetail(err)}`,
       );
     }
   }
