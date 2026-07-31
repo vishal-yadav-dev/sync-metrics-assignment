@@ -1,5 +1,9 @@
 # Build Instructions for Claude Code
 
+## Implementation Status
+
+This document is the full architecture spec the project was designed against. For the submission, the following were implemented and are live: the Google Calendar and Stripe sources, the normalized schema, the idempotent upsert, the sync runner (reactive fallback + fault isolation), the metrics service (both endpoints), and the /health, /sync, /records endpoints. Deferred for time, but specified here and structurally supported by the source-agnostic design: the HubSpot source, the proactive 24h backfill (mode.ts), and inbound webhooks. These would slot into the existing runner and upsert path with no changes to the write path or schema.
+
 - Build in small pieces, one module at a time. Do NOT scaffold the whole project in one go.
 - After each piece, stop and tell me the exact command to run/test it. Wait for me to confirm before continuing.
 - Write a test for each core piece (upsert idempotency, stale-cursor fallback, revenue reconciliation) and show it passing.

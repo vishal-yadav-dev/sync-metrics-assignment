@@ -69,7 +69,7 @@ export async function markCursorError(
   await writeCursor(key, kind, { last_status: "error" }, conn);
 }
 
-// last_full_sync_at is what mode.ts reads for the proactive 24h backfill decision.
+// Also stamps last_full_sync_at, the watermark a proactive-backfill decision reads.
 export async function stampFullSync(
   key: CursorKey,
   kind: CursorKind,

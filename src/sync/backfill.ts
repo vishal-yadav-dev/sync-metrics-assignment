@@ -2,8 +2,7 @@ import type { SourceAdapter } from "../sources/types";
 import { stampFullSync } from "./cursor";
 import { type UpsertCounts, upsertMany } from "./upsert";
 
-// Full-fetch execution. Reached two ways — proactively from mode.ts, or reactively from the
-// runner after a StaleCursorError — but the path is identical either way.
+// Full-fetch execution, shared by a scheduled backfill and the runner's reactive fallback.
 export async function runBackfill(adapter: SourceAdapter): Promise<UpsertCounts> {
   const { source, record_type, cursor_kind } = adapter;
 

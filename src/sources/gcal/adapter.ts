@@ -32,8 +32,8 @@ export class GcalAdapter implements SourceAdapter {
 
   private calendar: calendar_v3.Calendar | null = null;
 
-  // No GOOGLE_CALENDAR_ID env var exists, so the calendar is a constructor arg. A service
-  // account's own 'primary' is empty — pass the shared calendar's id to sync real data.
+  // A service account's own 'primary' calendar is empty; real data needs the id of a
+  // calendar shared with it (GOOGLE_CALENDAR_ID).
   constructor(private readonly calendarId: string = 'primary') {}
 
   // Built lazily: the Google credentials are optional env vars, so constructing this at
@@ -56,7 +56,6 @@ export class GcalAdapter implements SourceAdapter {
     return this.drain(cursor === null ? {} : { syncToken: cursor }, true);
   }
 
-  // Full backfill ignores any stored cursor by definition — it starts from the top.
   async fetchFull(_cursor: string | null): Promise<FetchResult> {
     return this.drain({}, false);
   }

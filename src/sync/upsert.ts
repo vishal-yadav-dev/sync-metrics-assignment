@@ -26,7 +26,7 @@ where excluded.content_hash <> synced_records.content_hash
 returning (xmax = 0) as inserted
 `;
 
-// THE write path. Sync job and webhooks both land here; nothing else writes synced_records.
+// THE write path. Nothing else writes synced_records.
 export async function upsertRecord(
   record: NormalizedRecord,
   conn: Queryable = db,
