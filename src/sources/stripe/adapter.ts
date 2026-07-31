@@ -36,7 +36,6 @@ export class StripeAdapter implements SourceAdapter {
     return this.drain(cursor);
   }
 
-  // Full backfill starts from the top by contract, so any stored cursor is ignored.
   async fetchFull(_cursor: string | null): Promise<FetchResult> {
     return this.drain(null);
   }
